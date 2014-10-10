@@ -103,7 +103,7 @@ bloat_data AS (
 )
 -- filter output for bloated tables
 SELECT databasename, schemaname, tablename,
-    can_estimate, is_compressed,
+    --can_estimate, is_compressed,
     pct_bloat, mb_bloat,
     table_size, expected_size
 FROM bloat_data

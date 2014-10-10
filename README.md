@@ -15,3 +15,23 @@ kill_idle_93.sql
 ----------------
 
 A stored procedure which kills idle transactions on PostgreSQL versions 9.2 and later.  Intended to be called by a cron job.  Takes idle time and exempted user list parameters.  Outputs JSON with the data about the sessions killed.
+
+index_bloat_check.sql
+---------------------
+
+An overhauled index bloat check.  Lists indexes which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL > 8.4, superuser access, and a 64-bit compile.
+
+table_bloat_check.sql
+---------------------
+
+An overhauled table bloat check.  Lists tables which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL >= 8.4, superuser access, and a 64-bit compile.
+
+
+Additional Contributors
+=======================
+
+In addition to the staff of PostgreSQL Experts, we are indebted
+to:
+
+* The authors of the check_postgres.pl script for supplying the
+  original bloat queries on which our bloat queries are based.
