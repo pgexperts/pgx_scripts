@@ -94,8 +94,8 @@ bloat_data AS (
     -- do final math calculations and formatting
     select current_database() as databasename,
         schemaname, tablename, can_estimate, is_compressed,
-        table_bytes, pg_size_pretty(table_bytes) as table_size,
-        expected_bytes, pg_size_pretty(expected_bytes) as expected_size,
+        table_bytes, round(table_bytes/(1024^2)::NUMERIC,3) as table_mb,
+        expected_bytes, round(expected_bytes/(1024^2)::NUMERIC,3) as expected_mb,
         round(bloat_bytes*100/table_bytes) as pct_bloat,
         round(bloat_bytes/(1024::NUMERIC^2),2) as mb_bloat,
         table_bytes, expected_bytes
@@ -105,7 +105,7 @@ bloat_data AS (
 SELECT databasename, schemaname, tablename,
     --can_estimate, is_compressed,
     pct_bloat, mb_bloat,
-    table_size, expected_size
+    table_mb
 FROM bloat_data
 -- this where clause defines which tables actually appear
 -- in the bloat chart

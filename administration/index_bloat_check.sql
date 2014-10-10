@@ -13,11 +13,7 @@ index_item_sizes AS (
     i.nspname, i.relname, i.reltuples, i.relpages, i.relam,
     s.starelid, a.attrelid AS table_oid, index_oid,
     current_setting('block_size')::numeric AS bs,
-    /* MAXALIGN: 4 on 32bits, 8 on 64bits (and mingw32 ?) */
-    CASE
-        WHEN version() ~ 'mingw32' OR version() ~ '64-bit' THEN 8
-        ELSE 4
-    END AS maxalign,
+    8 AS maxalign,
     24 AS pagehdr,
     /* per tuple header: add index_attribute_bm if some cols are null-able */
     CASE WHEN max(coalesce(s.stanullfrac,0)) = 0
@@ -57,7 +53,7 @@ otta_calc AS (
 ),
 raw_bloat AS (
     SELECT current_database() as dbname, nspname, c.relname AS table_name, index_name,
-        bs*(sub.relpages)::bigint AS totalbytes,
+        bs*(sub.relpages)::bigint AS totalbytes, otta as expected,
         CASE
             WHEN sub.relpages <= otta THEN 0
             ELSE bs*(sub.relpages-otta)::bigint END
@@ -71,13 +67,19 @@ raw_bloat AS (
     FROM otta_calc AS sub
     JOIN pg_class AS c ON c.oid=sub.table_oid
     JOIN pg_stat_user_indexes AS stat ON sub.index_oid = stat.indexrelid
-)
+),
+format_bloat AS (
 SELECT dbname as database_name, nspname as schema_name, table_name, index_name,
-        round(realbloat, 1) as bloat_pct,
-        wastedbytes as bloat_bytes, pg_size_pretty(wastedbytes::bigint) as bloat_size,
-        totalbytes as index_bytes, pg_size_pretty(totalbytes::bigint) as index_size,
-        table_bytes, pg_size_pretty(table_bytes) as table_size,
+        round(realbloat) as bloat_pct, round(wastedbytes/(1024^2)::NUMERIC) as bloat_mb,
+        round(totalbytes/(1024^2)::NUMERIC,3) as index_mb,
+        round(table_bytes/(1024^2)::NUMERIC,3) as table_mb,
         index_scans
 FROM raw_bloat
-WHERE ( realbloat > 50 and wastedbytes > 50000000 )
-ORDER BY wastedbytes DESC;
+)
+-- final query outputting the bloated indexes
+-- change the where and order by to change
+-- what shows up as bloated
+SELECT *
+FROM format_bloat
+WHERE ( bloat_pct > 50 and bloat_mb > 10 )
+ORDER BY bloat_mb DESC;
