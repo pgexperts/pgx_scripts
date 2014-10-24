@@ -26,6 +26,21 @@ table_bloat_check.sql
 
 An overhauled table bloat check.  Lists tables which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL >= 8.4, superuser access, and a 64-bit compile.
 
+Locks
+=====
+
+Tools and a set of queries to analyze lock-blocking.
+
+transaction_locks.sql
+---------------------
+
+Requires: Postgres 9.2+
+
+Lists waiting transaction locks and what they're waiting on, if possible.
+Includes relation and query information, but realistically needs to be
+accompanied by full query logging to be useful.  Needs to be run
+per active database.
+
 
 Additional Contributors
 =======================
@@ -35,3 +50,4 @@ to:
 
 * The authors of the check_postgres.pl script for supplying the
   original bloat queries on which our bloat queries are based.
+* Andrew Gierth for help on various system queries.
