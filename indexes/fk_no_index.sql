@@ -53,15 +53,15 @@ fk_index_match AS (
         indkey::int[] as indexatts,
         has_predicate,
         indexdef,
-        array_upper(key_cols, 1) as fk_colcount,
-        array_upper(indkey,1) as index_colcount,
+        array_length(key_cols, 1) as fk_colcount,
+        array_length(indkey,1) as index_colcount,
         round(pg_relation_size(conrelid)/(1024^2)::numeric) as table_mb,
         cols_list
     FROM fk_list
         JOIN fk_cols_list USING (fkoid)
         LEFT OUTER JOIN index_list
             ON conrelid = indrelid
-            AND (indkey::int2[])[0:(array_upper(key_cols,1) -1)] @> key_cols
+            AND (indkey::int2[])[array_lower(key_cols,1):(array_upper(key_cols,1) -1)] @> key_cols
 ),
 fk_perfect_match AS (
     SELECT fkoid
