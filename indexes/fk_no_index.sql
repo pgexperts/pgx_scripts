@@ -61,7 +61,8 @@ fk_index_match AS (
         JOIN fk_cols_list USING (fkoid)
         LEFT OUTER JOIN index_list
             ON conrelid = indrelid
-            AND (indkey::int2[])[array_lower(key_cols,1):(array_upper(key_cols,1) -1)] @> key_cols
+            -- lower bound of indkey is known to be 0
+            AND (indkey::int2[])[0:array_length(key_cols,1) -1] @> key_cols
 ),
 fk_perfect_match AS (
     SELECT fkoid
