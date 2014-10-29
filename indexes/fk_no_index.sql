@@ -10,7 +10,7 @@ WITH fk_actions ( code, action ) AS (
         ( 'd', 'set default' )
 ),
 fk_list AS (
-    SELECT pg_constraint.oid as fkoid, conrelid, confrelid as referrelid,
+    SELECT pg_constraint.oid as fkoid, conrelid, confrelid as parentid,
         conname, relname, nspname,
         fk_actions_update.action as update_action,
         fk_actions_delete.action as delete_action,
@@ -61,7 +61,7 @@ fk_index_match AS (
         JOIN fk_cols_list USING (fkoid)
         LEFT OUTER JOIN index_list
             ON conrelid = indrelid
-            AND (indkey::int2[])[array_lower(key_cols,1):(array_upper(key_cols,1) -1)] @> key_cols
+            AND (indkey::int2[])[0:(array_length(key_cols,1) -1)] @> key_cols
 ),
 fk_perfect_match AS (
     SELECT fkoid
@@ -81,14 +81,40 @@ fk_index_check AS (
         AND fkoid NOT IN (
             SELECT fkoid
             FROM fk_perfect_match)
+),
+parent_table_stats AS (
+    SELECT fkoid, tabstats.relname as parent_name,
+        (n_tup_ins + n_tup_upd + n_tup_del + n_tup_hot_upd) as parent_writes,
+        round(pg_relation_size(parentid)/(1024^2)::numeric) as parent_mb
+    FROM pg_stat_user_tables AS tabstats
+        JOIN fk_list
+            ON relid = parentid
+),
+fk_table_stats AS (
+    SELECT fkoid,
+        (n_tup_ins + n_tup_upd + n_tup_del + n_tup_hot_upd) as writes,
+        seq_scan as table_scans
+    FROM pg_stat_user_tables AS tabstats
+        JOIN fk_list
+            ON relid = conrelid
 )
 SELECT nspname as schema_name,
     relname as table_name,
     conname as fk_name,
     issue,
     table_mb,
+    writes,
+    table_scans,
+    parent_name,
+    parent_mb,
+    parent_writes,
     cols_list,
     indexdef
 FROM fk_index_check
---WHERE table_mb > 9
-ORDER BY issue_sort, table_mb DESC, fk_name;
+    JOIN parent_table_stats USING (fkoid)
+    JOIN fk_table_stats USING (fkoid)
+WHERE table_mb > 9
+    AND ( writes > 1000
+        OR parent_writes > 1000
+        OR parent_mb > 10 )
+ORDER BY issue_sort, table_mb DESC, table_name, fk_name;
