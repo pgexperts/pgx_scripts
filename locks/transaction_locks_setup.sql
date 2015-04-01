@@ -78,6 +78,7 @@ BEGIN
         from txn_waiting
             JOIN pg_stat_activity as waiting_proc
                 ON txn_waiting.pid = waiting_proc.pid
+                    AND waiting_proc.datname = current_database()
             LEFT OUTER JOIN txn_granted
                 ON txn_waiting.lxid = txn_granted.lxid
             LEFT OUTER JOIN pg_stat_activity as locked_proc
