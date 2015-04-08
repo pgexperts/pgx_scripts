@@ -12,3 +12,5 @@ scripts add a way to log complex information to PostgreSQL tables.
 Note that, under pathological conditions, querying the locks tables can have significant overhead,
 and the lock logging query itself can become blocked or bog down.  For that reason, we recommend
 discretion on how frequently you run the cron job.
+
+**Requires PostgreSQL 9.2 or Later**
