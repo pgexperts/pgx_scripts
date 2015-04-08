@@ -124,9 +124,46 @@ BEGIN
                     ON txn_granted.pid = locked_locks.pid
             returning waiting_pid
         )
-        SELECT count(*) FROM inserter;
-        $l$;
+        select now() as lock_ts,
+            txn_waiting.pid as waiting_pid,
+            txn_waiting.lxid as wait_xid,
+            txn_granted.pid as locked_pid,
+            waiting_proc.application_name as waiting_app,
+            waiting_proc.client_addr as waiting_addr,
+            waiting_proc.xact_start as waiting_xact_start,
+            waiting_proc.query_start as waiting_query_start,
+            waiting_proc.state_change as waiting_start,
+            waiting_proc.query as waiting_query,
+            locked_proc.application_name as locked_app,
+            locked_proc.client_addr as locked_addr,
+            locked_proc.xact_start as locked_xact_start,
+            locked_proc.query_start as locked_query_start,
+            locked_proc.state as locked_state,
+            locked_proc.state_change as locked_state_start,
+            locked_proc.query as locked_last_query,
+            waiting_locks.lock_relations as waiting_relations,
+            waiting_locks.lock_modes as waiting_modes,
+            waiting_locks.lock_types as waiting_lock_types,
+            locked_locks.lock_relations as locked_relations,
+            locked_locks.lock_modes as locked_modes,
+            locked_locks.lock_types as locked_lock_types
+        from txn_waiting
+            JOIN pg_stat_activity as waiting_proc
+                ON txn_waiting.pid = waiting_proc.pid
+                    AND waiting_proc.datname = current_database()
+            LEFT OUTER JOIN txn_granted
+                ON txn_waiting.lxid = txn_granted.lxid
+            LEFT OUTER JOIN pg_stat_activity as locked_proc
+                ON txn_granted.pid = locked_proc.pid
+            LEFT OUTER JOIN locked_list AS waiting_locks
+                ON txn_waiting.pid = waiting_locks.pid
+            LEFT OUTER JOIN locked_list AS locked_locks
+                ON txn_granted.pid = locked_locks.pid
+        order by waiting_pid;
 
+        CREATE TABLE log_transaction_locks AS
+        SELECT * FROM log_transaction_locks_view
+        WHERE FALSE;
     END IF;
 END;
 $f$;
