@@ -61,7 +61,7 @@ SELECT array_to_string(ARRAY[ now()::TEXT,
 FROM idles
 ORDER BY xact_start;"
 
-psql -q -t -c "${KILLQUERY}"
+$PSQL -q -t -c "${KILLQUERY}"
 
 exit 0
 
