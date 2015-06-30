@@ -7,6 +7,7 @@ WITH btree_index_atts AS (
     JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
     JOIN pg_am ON pg_class.relam = pg_am.oid
     WHERE pg_am.amname = 'btree'
+        AND nspname NOT IN ('pg_catalog','information_schema')
     ),
 index_item_sizes AS (
     SELECT
