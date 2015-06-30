@@ -3,8 +3,24 @@ pgx_scripts
 
 A collection of useful little scripts for database analysis and administration, created by our team at PostgreSQL Experts.
 
-administration
-==============
+bloat
+=====
+
+Queries to estimate bloat in tables and indexes.
+
+index_bloat_check.sql
+---------------------
+
+An overhauled index bloat check.  Lists indexes which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL > 8.4, superuser access, and a 64-bit compile.
+
+table_bloat_check.sql
+---------------------
+
+An overhauled table bloat check.  Lists tables which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL >= 8.4 and a 64-bit compile.  Cannot estimate bloat for tables containing types with no stats functions (such as original JSON).
+
+
+kill_idle
+=========
 
 kill_idle_91.sql
 ----------------
@@ -16,15 +32,7 @@ kill_idle_93.sql
 
 A stored procedure which kills idle transactions on PostgreSQL versions 9.2 and later.  Intended to be called by a cron job.  Takes idle time and exempted user list parameters.  Outputs JSON with the data about the sessions killed.
 
-index_bloat_check.sql
----------------------
 
-An overhauled index bloat check.  Lists indexes which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL > 8.4, superuser access, and a 64-bit compile.
-
-table_bloat_check.sql
----------------------
-
-An overhauled table bloat check.  Lists tables which are likely to be bloated and estimates bloat amounts.  Requires PostgreSQL >= 8.4, superuser access, and a 64-bit compile.
 
 Locks
 =====

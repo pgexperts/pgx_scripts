@@ -8,15 +8,20 @@ WITH constants AS (
 no_stats AS (
     -- screen out table who have attributes
     -- which dont have stats, such as JSON
-    SELECT table_schema, table_name
+    SELECT table_schema, table_name, 
+        n_live_tup::numeric as est_rows,
+        pg_table_size(relid)::numeric as table_size
     FROM information_schema.columns
+        JOIN pg_stat_user_tables as psut
+           ON table_schema = psut.schemaname
+           AND table_name = psut.relname
         LEFT OUTER JOIN pg_stats
-        ON table_schema = schemaname
-            AND table_name = tablename
-            AND column_name = attname
+        ON table_schema = pg_stats.schemaname
+            AND table_name = pg_stats.tablename
+            AND column_name = attname 
     WHERE attname IS NULL
         AND table_schema NOT IN ('pg_catalog', 'information_schema')
-    GROUP BY table_schema, table_name
+    GROUP BY table_schema, table_name, relid, n_live_tup
 ),
 null_headers AS (
     -- calculate null header sizes
@@ -53,17 +58,31 @@ table_estimates AS (
     -- make estimates of how large the table should be
     -- based on row and page size
     SELECT schemaname, tablename, bs,
-        reltuples, relpages * bs as table_bytes,
+        reltuples::numeric as est_rows, relpages * bs as table_bytes,
     CEIL((reltuples*
             (datahdr + nullhdr2 + 4 + ma -
                 (CASE WHEN datahdr%ma=0
                     THEN ma ELSE datahdr%ma END)
-                )/(bs-20))) * bs AS expected_bytes
+                )/(bs-20))) * bs AS expected_bytes,
+        reltoastrelid
     FROM data_headers
         JOIN pg_class ON tablename = relname
         JOIN pg_namespace ON relnamespace = pg_namespace.oid
             AND schemaname = nspname
     WHERE pg_class.relkind = 'r'
+),
+estimates_with_toast AS (
+    -- add in estimated TOAST table sizes
+    -- estimate based on 4 toast tuples per page because we dont have 
+    -- anything better.  also append the no_data tables
+    SELECT schemaname, tablename, 
+        TRUE as can_estimate,
+        est_rows,
+        table_bytes + ( coalesce(toast.relpages, 0) * bs ) as table_bytes,
+        expected_bytes + ( ceil( coalesce(toast.reltuples, 0) / 4 ) * bs ) as expected_bytes
+    FROM table_estimates LEFT OUTER JOIN pg_class as toast
+        ON table_estimates.reltoastrelid = toast.oid
+            AND toast.relkind = 't'
 ),
 table_estimates_plus AS (
 -- add some extra metadata to the table data
@@ -71,11 +90,8 @@ table_estimates_plus AS (
 -- including whether we cant estimate it
 -- or whether we think it might be compressed
     SELECT current_database() as databasename,
-            schemaname, tablename, reltuples as est_rows,
-            CASE WHEN expected_bytes > 0 AND table_bytes > 0 THEN
-                TRUE ELSE FALSE END as can_estimate,
-            CASE WHEN expected_bytes > table_bytes THEN
-                TRUE ELSE FALSE END as is_compressed,
+            schemaname, tablename, can_estimate, 
+            est_rows,
             CASE WHEN table_bytes > 0
                 THEN table_bytes::NUMERIC
                 ELSE NULL::NUMERIC END
@@ -88,22 +104,29 @@ table_estimates_plus AS (
                 AND expected_bytes <= table_bytes
                 THEN (table_bytes - expected_bytes)::NUMERIC
                 ELSE 0::NUMERIC END AS bloat_bytes
-    FROM table_estimates
+    FROM estimates_with_toast
+    UNION ALL
+    SELECT current_database() as databasename, 
+        table_schema, table_name, FALSE, 
+        est_rows, table_size,
+        NULL::NUMERIC, NULL::NUMERIC
+    FROM no_stats
 ),
 bloat_data AS (
     -- do final math calculations and formatting
     select current_database() as databasename,
-        schemaname, tablename, can_estimate, is_compressed,
+        schemaname, tablename, can_estimate, 
         table_bytes, round(table_bytes/(1024^2)::NUMERIC,3) as table_mb,
         expected_bytes, round(expected_bytes/(1024^2)::NUMERIC,3) as expected_mb,
         round(bloat_bytes*100/table_bytes) as pct_bloat,
         round(bloat_bytes/(1024::NUMERIC^2),2) as mb_bloat,
-        table_bytes, expected_bytes
+        table_bytes, expected_bytes, est_rows
     FROM table_estimates_plus
 )
 -- filter output for bloated tables
 SELECT databasename, schemaname, tablename,
-    --can_estimate, is_compressed,
+    can_estimate,
+    est_rows,
     pct_bloat, mb_bloat,
     table_mb
 FROM bloat_data
