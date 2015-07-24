@@ -23,6 +23,20 @@ no_stats_table_check.sql
 
 Query to list all tables which have "no stats" columns and thus can't be estimated.
 
+freeze
+======
+
+Queries to report how close tables are to XID wraparound autovacuum; see
+http://www.databasesoup.com/2012/09/freezing-your-tuples-off-part-1.html
+et seq.
+
+big_tables_with_old_xids.sql - query to show, well, what it says on the tin.
+
+oldest_xid.sh - script to show/record your oldest XID still in use.
+Takes one argument, the filename into which to write its results.
+Run twice, four hours to one day apart, in order to determine the
+optimal setting for vacuum_freeze_min_age; when you run it, the script
+will print more-detailed instructions.
 
 kill_idle
 =========
