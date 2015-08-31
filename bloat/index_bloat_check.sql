@@ -16,7 +16,7 @@ WITH btree_index_atts AS (
     JOIN pg_namespace ON pg_namespace.oid = indexclass.relnamespace
     JOIN pg_am ON indexclass.relam = pg_am.oid
     WHERE pg_am.amname = 'btree' and indexclass.relpages > 0
-         --AND nspname NOT IN ('pg_catalog','information_schema')
+         AND nspname NOT IN ('pg_catalog','information_schema')
     ),
 index_item_sizes AS (
     SELECT
@@ -86,7 +86,7 @@ raw_bloat AS (
 ),
 format_bloat AS (
 SELECT dbname as database_name, nspname as schema_name, table_name, index_name,
-        round(realbloat) as bloat_pct, round(wastedbytes/(1024^2)::NUMERIC) as bloat_mb,
+        round(realbloat) as \bloat_pct, round(wastedbytes/(1024^2)::NUMERIC) as bloat_mb,
         round(totalbytes/(1024^2)::NUMERIC,3) as index_mb,
         round(table_bytes/(1024^2)::NUMERIC,3) as table_mb,
         index_scans

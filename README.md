@@ -52,6 +52,11 @@ duplicate_indexes_fuzzy.sql
 
 Check indexes and looks at whether or not they are potentially duplicates.  It does this by checking the columns used by each index, so it reports lots of false duplicates for partial and functional indexes.
 
+needed_indexes.sql
+------------------
+
+Checks for tables which are getting too much sequential scan activity and might need additional indexing.  Reports in four groups based on table size, number of scans, write activity, and number of existing indexes.
+
 Locks
 =====
 
