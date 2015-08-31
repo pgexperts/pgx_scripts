@@ -12,7 +12,7 @@ index_usage AS (
             sut.seq_scan as table_scans,
             sut.idx_scan as index_scans,
             pg_total_relation_size(relid) as table_bytes,
-            round(sut.n_tup_ins + sut.n_tup_del + sut.n_tup_upd + sut.n_tup_hot_upd) / 
+            round((sut.n_tup_ins + sut.n_tup_del + sut.n_tup_upd + sut.n_tup_hot_upd) / 
                 (seq_tup_read::NUMERIC + 2), 2) as writes_per_scan
     FROM pg_stat_user_tables sut,
         write_adjust
