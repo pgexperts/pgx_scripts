@@ -1,9 +1,4 @@
 WITH 
-write_adjust AS (
-    -- change the below to 1.0 if pg_stats goes back to
-    -- the creation of the database
-    SELECT 0.0 AS adjustment
-),
 index_usage AS (
     SELECT  sut.relid,
             current_database() AS database,
@@ -14,8 +9,7 @@ index_usage AS (
             pg_total_relation_size(relid) as table_bytes,
             round((sut.n_tup_ins + sut.n_tup_del + sut.n_tup_upd + sut.n_tup_hot_upd) / 
                 (seq_tup_read::NUMERIC + 2), 2) as writes_per_scan
-    FROM pg_stat_user_tables sut,
-        write_adjust
+    FROM pg_stat_user_tables sut
 ),
 index_counts AS (
     SELECT sut.relid,
