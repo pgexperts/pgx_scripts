@@ -12,12 +12,13 @@ export PGHOST=127.0.0.1
 export PGDATABASE=pgbouncer
 
 adddate() {
+    DTSTAMP=$(date +"%Y-%m-%d %H:%M:%S")
     while IFS= read -r line; do
-        echo "$(date +"%Y-%m-%d %H:%M:%S")|$line"
+        echo "$DTSTAMP|$line"
     done
 }
 
-while [ CURMIN -lt NUMMIN  ] 
+while [ $CURMIN -lt $NUMMIN  ] 
 do
 
     psql -q -A -t -c "show pools" | adddate >> pools.log
