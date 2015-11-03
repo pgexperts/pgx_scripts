@@ -6,9 +6,17 @@ NUMMIN=${1:-60}
 NUMMIN=$(($NUMMIN * 2 + 10))
 CURMIN=0
 
-export PGUSER=pgbouncer
-export PGDATABASE=pgbouncer
-export PGPORT=6542
+# If you want to hard-code these, uncomment them.
+# Otherwise just set these variables in your
+# shell before running this command, using the
+# same three lines listed below.
+#
+# If you need to set a password, use ~/.pgpass:
+# http://www.postgresql.org/docs/9.3/static/libpq-pgpass.html
+
+#export PGUSER=pgbouncer
+#export PGDATABASE=pgbouncer
+#export PGPORT=6542
 
 PSFILE="ps-scratch.txt"
 STOPFILE="./stopfile"
