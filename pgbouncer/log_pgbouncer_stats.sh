@@ -14,9 +14,10 @@ CURMIN=0
 # If you need to set a password, use ~/.pgpass:
 # http://www.postgresql.org/docs/9.3/static/libpq-pgpass.html
 
-#export PGUSER=pgbouncer
-#export PGDATABASE=pgbouncer
-#export PGPORT=6542
+## export PGUSER=pgbouncer
+## export PGDATABASE=pgbouncer
+## export PGPORT=6542
+## export PGPASSWORD=
 
 PSFILE="ps-scratch.txt"
 STOPFILE="./stopfile"
@@ -48,6 +49,7 @@ do
     psql -q -A -t -F " " -c "show pools" | adddate >> pools.log
     psql -q -A -t -F " " -c "show stats" | adddate >> stats.log
     psql -q -A -t -F " " -c "show clients" | adddate >> clients.log
+    psql -q -A -t -F " " -U postgres -p 5432 -d justintv_prod -c "select * from pg_stat_activity" | adddate >> pg_stat_activity.log
 
     log_resource_usage
 
