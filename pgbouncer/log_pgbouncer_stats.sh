@@ -6,23 +6,24 @@ NUMMIN=${1:-60}
 NUMMIN=$(($NUMMIN * 2 + 10))
 CURMIN=0
 
-# If you want to hard-code these, uncomment them.
-# Otherwise just set these variables in your
-# shell before running this command, using the
-# same three lines listed below.
+# One typical use case is to run this script, plus other scripts that connect
+# to the target database, inside the same interactive shell process.
+# To make that work, you need to hard-code the PG* environment variables
+# for connecting to pgbouncer inside this script. The defaults below probably
+# will not work for your setup (in particular, your pgbouncer PGPORT
+# is probably 6543, not 6542).
 #
-# If you need to set a password, use ~/.pgpass:
+# If you need to give a password to get access to pgbouncer, use ~/.pgpass:
 # http://www.postgresql.org/docs/9.3/static/libpq-pgpass.html
 
-## export PGUSER=pgbouncer
-## export PGDATABASE=pgbouncer
-## export PGPORT=6542
+export PGUSER=pgbouncer
+export PGDATABASE=pgbouncer
+export PGPORT=6542
 ## export PGPASSWORD=
 
 PSFILE="ps-scratch.txt"
 STOPFILE="./stopfile"
 clean_up_and_exit() {
-    echo 'Caught interrupt; exiting'
     rm $PSFILE
     rm -f "$STOPFILE"
     exit $?
