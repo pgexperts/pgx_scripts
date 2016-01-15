@@ -2,6 +2,7 @@ with datage as (
 select datname, age(datfrozenxid) as xid_age,
     round(pg_database_size(oid)/(128*1024::numeric),1) as gb_size
     from pg_database 
+    where datname not in ('rdsadmin') -- no perms to examine this one (AWS)
 ),
 av_max_age as (
     select setting::numeric as max_age from pg_settings where name = 'autovacuum_freeze_max_age'
@@ -19,5 +20,3 @@ WHERE ((av_wrap_pct >= 75 or shutdown_pct > 50
     and gb_size > 1))
     or (av_wrap_pct > 100 or shutdown_pct > 80)
 order by xid_age desc;
-
-    
