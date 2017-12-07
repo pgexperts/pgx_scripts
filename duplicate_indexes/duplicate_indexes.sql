@@ -1,7 +1,9 @@
 SELECT ni.nspname AS "namepsace", 
        ct.relname AS "table", 
        ci.relname AS "dup index",
+       i.indkey AS "dup index attributes",
        pg_get_indexdef(i.indexrelid) AS "dup index definition", 
+       ii.indkey AS "enc index attributes",
        cii.relname AS "encompassing index", 
        pg_get_indexdef(ii.indexrelid) AS "encompassing index definition"
   FROM pg_index i
