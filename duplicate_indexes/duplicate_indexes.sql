@@ -1,11 +1,10 @@
-SELECT ni.nspname AS "namepsace", 
-       ct.relname AS "table", 
+SELECT ni.nspname || '.' || ct.relname AS "table", 
        ci.relname AS "dup index",
-       i.indkey AS "dup index attributes",
        pg_get_indexdef(i.indexrelid) AS "dup index definition", 
-       ii.indkey AS "enc index attributes",
+       i.indkey AS "dup index attributes",
        cii.relname AS "encompassing index", 
        pg_get_indexdef(ii.indexrelid) AS "encompassing index definition"
+       ii.indkey AS "enc index attributes",
   FROM pg_index i
   JOIN pg_class ct ON i.indrelid=ct.oid
   JOIN pg_class ci ON i.indexrelid=ci.oid
@@ -20,7 +19,6 @@ SELECT ni.nspname AS "namepsace",
                       CASE WHEN i.indisunique THEN ii.indisunique ELSE true END
   JOIN pg_class ctii ON ii.indrelid=ctii.oid
   JOIN pg_class cii ON ii.indexrelid=cii.oid
-  JOIN pg_namespace nii ON cii.relnamespace=nii.oid
  WHERE ct.relname NOT LIKE 'pg_%' AND
        NOT i.indisprimary
  ORDER BY 1, 2, 3
