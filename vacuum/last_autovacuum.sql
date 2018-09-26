@@ -2,9 +2,9 @@
 select
     pg_class.relname,
     pg_namespace.nspname,
-    pg_size_pretty(pg_total_relation_size(pg_namespace.nspname::text || '.' || pg_class.relname::text)),
+    pg_size_pretty(pg_total_relation_size('"' || pg_namespace.nspname::text || '"' || '.' || '"' || pg_class.relname::text || '"')),
     pg_stat_all_tables.last_autovacuum,
-    pg_relation_size(pg_namespace.nspname::text || '.' || pg_class.relname::text)
+    pg_relation_size('"' || pg_namespace.nspname::text || '"' || '.' || '"' || pg_class.relname::text || '"')
 from
     pg_class
         join pg_namespace
