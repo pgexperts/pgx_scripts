@@ -19,7 +19,8 @@ SELECT ni.nspname || '.' || ct.relname AS "table",
                       NOT (i.indkey::integer[] @> ARRAY[0]) AND -- Remove if you want expression indexes (you probably don't)
                       i.indpred IS NULL AND -- Remove if you want indexes with predicates
                       ii.indpred IS NULL AND -- Remove if you want indexes with predicates
-                      CASE WHEN i.indisunique THEN ii.indisunique ELSE true END
+                      CASE WHEN i.indisunique THEN ii.indisunique AND
+                         array_to_string(ii.indkey, ' ') = array_to_string(i.indkey, ' ') ELSE true END
   JOIN pg_class ctii ON ii.indrelid=ctii.oid
   JOIN pg_class cii ON ii.indexrelid=cii.oid
  WHERE ct.relname NOT LIKE 'pg_%' AND
