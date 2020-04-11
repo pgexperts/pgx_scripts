@@ -182,8 +182,13 @@ fi
 for ((i=0; i<$XNUMBER; i++)); do
                     
     for DBNAME in $DBNAMES; do
-        $PSQL -A -q -t -c "SET STATEMENT_TIMEOUT=${STATTIMEOUT}; ${TABLEQUERY}" -U $SUPER $DBNAME $DBPORT $DBHOST >> $TABLELOG
-        $PSQL -A -q -t -c "SET STATEMENT_TIMEOUT=${STATTIMEOUT}; ${XTNQUERY}" -U $SUPER $DBNAME $DBPORT $DBHOST >> $XTNLOG
+        if [[ -n "$DBHOST" ]]; then
+            HOST="-h $DBHOST"
+        else
+            HOST=$DBHOST
+        fi
+        $PSQL -A -q -t -c "SET STATEMENT_TIMEOUT=${STATTIMEOUT}; ${TABLEQUERY}" -U $SUPER $DBNAME $DBPORT $HOST >> $TABLELOG
+        $PSQL -A -q -t -c "SET STATEMENT_TIMEOUT=${STATTIMEOUT}; ${XTNQUERY}" -U $SUPER $DBNAME $DBPORT $HOST >> $XTNLOG
     done
     
     if (($i%10==0)); then
