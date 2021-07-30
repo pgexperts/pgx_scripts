@@ -137,4 +137,4 @@ FROM bloat_data
 -- bloated and more than 4GB in size
 WHERE ( pct_bloat >= 50 AND mb_bloat >= 10 )
     OR ( pct_bloat >= 25 AND mb_bloat >= 1000 )
-ORDER BY pct_bloat DESC;
+ORDER BY mb_bloat DESC;

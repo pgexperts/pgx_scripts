@@ -98,4 +98,4 @@ FROM raw_bloat
 SELECT *
 FROM format_bloat
 WHERE ( bloat_pct > 50 and bloat_mb > 10 )
-ORDER BY bloat_mb DESC;
+ORDER BY bloat_pct DESC;
