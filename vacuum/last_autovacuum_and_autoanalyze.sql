@@ -15,5 +15,5 @@ from
 where
     pg_namespace.nspname not in ('pg_toast')
 order by
-    5 desc
+    6 desc
 ;
