@@ -19,4 +19,6 @@ FROM information_schema.columns
         AND table_name = psut.relname
 WHERE pg_stats.attname IS NULL
     AND table_schema NOT IN ('pg_catalog', 'information_schema')
-GROUP BY table_schema, table_name, relpages, psut.relname, last_analyze, last_autoanalyze;
+GROUP BY table_schema, table_name, relpages, psut.relname, last_analyze, last_autoanalyze
+ORDER BY table_schema, table_name
+;
