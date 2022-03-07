@@ -10,4 +10,4 @@ AND table_schema
 NOT IN (
     'information_schema', 'pg_catalog'
 ) 
-AND table_type <> ‘VIEW’;
+AND table_type <> 'VIEW';
