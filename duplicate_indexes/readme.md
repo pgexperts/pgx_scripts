@@ -19,7 +19,7 @@ Some notes:
 
 * A primary key index will never be marked as a "duplicate."
 
-* Check for indexes on Foreign Keys and referenced columns. For referenced columns, dropping the duplicate index is not usually a problem, but for Foreign Keys you may have a tradeoff between query performance _vs_ INSERT, UPDATE, DELETE performance.
+* Review results for indexes on Foreign Keys and referenced columns. For referenced columns, dropping the duplicate index is not usually a problem, but for Foreign Keys you may have a tradeoff between query performance _vs_ INSERT, UPDATE, DELETE performance.
 
 * Your statistics may show that the "duplicate" index is being used;  this is normal and not an argument to keep the duplicate.  Postgres should switch to using the encompassing index once the duplicate is gone.
 
