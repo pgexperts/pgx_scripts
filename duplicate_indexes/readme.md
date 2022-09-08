@@ -25,6 +25,7 @@ Some notes:
 
 ## Example output
 
+```
 -[ RECORD 1 ]-----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 table                         | public.foo
 dup index                     | index_foo_on_bar
@@ -33,6 +34,7 @@ dup index attributes          | 2
 encompassing index            | index_foo_on_bar_and_baz
 encompassing index definition | CREATE INDEX index_foo_on_bar_and_baz ON public.foo USING btree (bar, baz)
 enc index attributes          | 2 3
+```
 
 Since the multi-column index `index_foo_on_bar_and_baz` would be used for searches on the `bar` column, we can drop the individual index `index_foo_on_bar`.
 
