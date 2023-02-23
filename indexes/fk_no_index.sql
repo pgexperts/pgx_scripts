@@ -109,6 +109,7 @@ SELECT nspname as schema_name,
     parent_name,
     parent_mb,
     parent_writes,
+     'CREATE INDEX ON ' || relname || ' ('  || Array_to_string(cols_list, ',') || ');' AS create_index_statment,
     cols_list,
     indexdef
 FROM fk_index_check
